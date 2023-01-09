@@ -8,7 +8,7 @@ from streamlit_agraph import Config, Edge, Node, agraph
 
 with st.spinner("Loading iris dataset"):
     iris = load_iris()
-    
+
 with st.spinner("Train decision tree classifier"):
     clf = tree.DecisionTreeClassifier()
     clf = clf.fit(iris.data, iris.target)
@@ -21,18 +21,13 @@ G = pgv.AGraph().from_string(dot_data)
 
 
 nodes = []
-edges = []
 for node in G.nodes():
     nodes.append(Node(id=node, 
                       label=node.attr['label'].split('\\n')[0], 
                       symbolType='square'))
-for edge in G.edges():
-        edges.append(
-            Edge(source=edge[0],
-                 target=edge[1], 
-                type="STRAIGHT")
-        )
-        
+edges = [
+    Edge(source=edge[0], target=edge[1], type="STRAIGHT") for edge in G.edges()
+]
 layout = st.sidebar.selectbox('layout',['dot',
                                         'neato', 
                                         'circo', 

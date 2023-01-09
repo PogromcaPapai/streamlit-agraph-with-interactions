@@ -10,10 +10,7 @@ class Node:
               **kwargs
                ):
     self.id=id
-    if not title:
-      self.title=id
-    else:
-     self.title=title
+    self.title = title or id
     self.label = label
     self.shape=shape # # image, circularImage, diamond, dot, star, triangle, triangleDown, hexagon, square and icon
     self.size=size
