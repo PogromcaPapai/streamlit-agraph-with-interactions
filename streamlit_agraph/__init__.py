@@ -13,7 +13,7 @@ from streamlit_agraph.node import Node
 from streamlit_agraph.edge import Edge
 from streamlit_agraph.triplestore import TripleStore
 
-_RELEASE = True
+_RELEASE = False
 
 if _RELEASE:
     parent_dir = os.path.dirname(os.path.abspath(__file__))
@@ -50,12 +50,12 @@ hierarchical = {
 
 if not _RELEASE:
     st.title("Streamlit Agraph 2.0")
-    # nodes.append( Node(id="Spiderman", shape="circularImage", size=25, image="http://marvel-force-chart.surge.sh/marvel_force_chart_img/top_spiderman.png"))
-    # nodes.append( Node(id="Captain_Marvel", color="black", size=25, shape="circularImage", image="http://marvel-force-chart.surge.sh/marvel_force_chart_img/top_captainmarvel.png"))
-    # nodes.append( Node(id="Chris", color="white", size=25, shape="circularImage", image="http://marvel-force-chart.surge.sh/marvel_force_chart_img/top_wolverine.png"))
-    # edges.append( Edge(source="Captain_Marvel", target="Spiderman", label="friend_of") )
-    # edges.append( Edge(source="Captain_Marvel", target="Chris", label="friend_of") )
-    nodes, edges = data.load_graph_data()
+    import networkx as nx
+    G = nx.karate_club_graph()
+
+    # Create the equivalent Node and Edge lists
+    nodes = [Node(id=i, label=str(i)) for i in range(len(G.nodes))]
+    edges = [Edge(source=i, target=j, type="CURVE_SMOOTH") for (i,j) in G.edges]
     config = Config(width=750, height=750) # layout={"hierarchical":True} directed=True #
     return_value = agraph(nodes, edges, config=config)
     st.write(return_value)

@@ -151,5 +151,9 @@ fabric.properties
 .DS_Store
 default.profraw
 default 4.profraw
-!/streamlit_agraph/frontend/node_modules/
-/streamlit_agraph/frontend/node_modules/
+# !/streamlit_agraph/frontend/node_modules/
+# /streamlit_agraph/frontend/node_modules/
+
+node_modules
+
+.venv
