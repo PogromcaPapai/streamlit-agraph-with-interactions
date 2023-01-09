@@ -31,8 +31,7 @@ def agraph(nodes, edges, config):
     config_json = json.dumps(config.__dict__)
     data = { "nodes": nodes_data, "edges": edges_data}
     data_json = json.dumps(data)
-    component_value = _agraph(data=data_json, config=config_json)
-    return component_value
+    return _agraph(data=data_json, config=config_json)
 
 hierarchical = {
       "enabled":False,
