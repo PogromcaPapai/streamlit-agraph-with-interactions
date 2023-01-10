@@ -24,14 +24,22 @@ else:
         "agraph",
         url="http://localhost:3001",
     )
-      
-def agraph(nodes, edges, config):
+
+@st.cache
+def get_context(nodes, edges, config):
     nodes_data = [ node.to_dict() for node in nodes]
     edges_data = [ edge.to_dict() for edge in edges]
     config_json = json.dumps(config.__dict__)
     data = { "nodes": nodes_data, "edges": edges_data}
     data_json = json.dumps(data)
-    component_value = _agraph(data=data_json, config=config_json)
+    return {"data":data_json, "config":config_json}
+ 
+def agraph(nodes, edges, config, **kwargs):
+    ons = {i.removeprefix("on").lower():j for i,j in kwargs.items() if i.startswith("on")}
+    
+    component_value = _agraph(**get_context(nodes, edges, config))
+    if component_value is not None and component_value.get('is_event'):
+        return ons.get(component_value['type'].lower(), lambda x: None)(component_value['event'])
     return component_value
 
 hierarchical = {
@@ -57,5 +65,9 @@ if not _RELEASE:
     nodes = [Node(id=i, label=str(i)) for i in range(len(G.nodes))]
     edges = [Edge(source=i, target=j, type="CURVE_SMOOTH") for (i,j) in G.edges]
     config = Config(width=750, height=750) # layout={"hierarchical":True} directed=True #
-    return_value = agraph(nodes, edges, config=config)
-    st.write(return_value)
+    container = st.container()
+    container.write("This is inside the container")
+    return_value = agraph(nodes, edges, config=config, onSelectNode=lambda _: container.write('test'))
+    # ^ i think the solution might be to replace this object with something that can be called
+    # maybe a class with __eq__ for types?
+    # st.write(return_value)

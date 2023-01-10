@@ -29,21 +29,36 @@ class StreamlitVisGraph extends StreamlitComponentBase {
   
     const options = JSON.parse(this.props.args["config"]);
 
+    function handleEvent(event:any, type:string) {
+      if (event.event !== undefined) event.event = undefined;
+      Streamlit.setComponentValue({
+        type: type,
+        event: event,
+        is_event: true
+      });
+    }
+
     const events = {
-
-      selectNode: (event:any) => {
-        Streamlit.setComponentValue(event.nodes[0]);
-      },
-
-      doubleClick: (event:any) => {
-        console.log(event.nodes);
-        // let link = nodes;
-        let lookup_node = lookup_node_id(event.nodes[0], nodes);
-        let link = lookup_node.div.innerHTML;
-        if(link){
-          window.open(link);
-        }
-      }
+      // click: (ev) => {handleEvent(ev, "click")},
+      // doubleClick: (ev) => {handleEvent(ev, "doubleClick")},
+      // oncontext: (ev) => {handleEvent(ev, "oncontext")},
+      // dragStart: (ev) => {handleEvent(ev, "dragStart")},
+      // dragging: (ev) => {handleEvent(ev, "dragging")},
+      // dragEnd: (ev) => {handleEvent(ev, "dragEnd")},
+      // controlNodeDragging: (ev) => {handleEvent(ev, "controlNodeDragging")},
+      // controlNodeDragEnd: (ev) => {handleEvent(ev, "controlNodeDragEnd")},
+      // zoom: (ev) => {handleEvent(ev, "zoom")},
+      // showPopup: (ev) => {handleEvent(ev, "showPopup")},
+      // hidePopup: (ev) => {handleEvent(ev, "hidePopup")},
+      // select: (ev) => {handleEvent(ev, "select")},
+      selectNode: (ev) => {handleEvent(ev, "selectNode")},
+      selectEdge: (ev) => {handleEvent(ev, "selectEdge")},
+      // deselectNode: (ev) => {handleEvent(ev, "deselectNode")},
+      // deselectEdge: (ev) => {handleEvent(ev, "deselectEdge")},
+      // hoverNode: (ev) => {handleEvent(ev, "hoverNode")},
+      // hoverEdge: (ev) => {handleEvent(ev, "hoverEdge")},
+      // blurNode: (ev) => {handleEvent(ev, "blurNode")},
+      // blurEdge: (ev) => {handleEvent(ev, "blurEdge")},
     };
     return (
       <span>
