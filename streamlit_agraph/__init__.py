@@ -1,8 +1,10 @@
+from functools import cache
 import os
 import csv
 import json
 
 from operator import itemgetter
+from typing import Any, Callable, NewType
 import streamlit.components.v1 as components
 import streamlit as st
 
@@ -25,22 +27,36 @@ else:
         url="http://localhost:3001",
     )
 
-@st.cache
-def get_context(nodes, edges, config):
-    nodes_data = [ node.to_dict() for node in nodes]
-    edges_data = [ edge.to_dict() for edge in edges]
-    config_json = json.dumps(config.__dict__)
-    data = { "nodes": nodes_data, "edges": edges_data}
-    data_json = json.dumps(data)
-    return {"data":data_json, "config":config_json}
- 
-def agraph(nodes, edges, config, **kwargs):
-    ons = {i.removeprefix("on").lower():j for i,j in kwargs.items() if i.startswith("on")}
+Event = NewType("Event", dict[str, Any])
+class Graph(object):
     
-    component_value = _agraph(**get_context(nodes, edges, config))
-    if component_value is not None and component_value.get('is_event'):
-        return ons.get(component_value['type'].lower(), lambda x: None)(component_value['event'])
-    return component_value
+    @st.cache
+    @staticmethod
+    def _get_context(nodes, edges, config):
+        nodes_data = [ node.to_dict() for node in nodes]
+        edges_data = [ edge.to_dict() for edge in edges]
+        config_json = json.dumps(config.__dict__)
+        data = { "nodes": nodes_data, "edges": edges_data}
+        data_json = json.dumps(data)
+        return {"data":data_json, "config":config_json}
+    
+    def __new__(cls, nodes, edges, config):
+        component_value = _agraph(**cls._get_context(nodes, edges, config))
+        if component_value is not None and component_value.get('is_event', False):
+            new = super().__new__(cls)
+            new.nodes = nodes
+            new.edges = edges
+            new.config = config
+            new.type_ = component_value.get('type')
+            new.event = component_value.get('event')
+            return new
+        else:
+            component_value.on = lambda x, y: None
+            return component_value
+        
+    def on(self, event_type: str, function: Callable[[Event, list[Node], list[Edge], Config], Any]) -> Any:
+        if event_type != None and event_type == self.type_:
+            return function(self.event, self.nodes, self.edges, self.config)
 
 hierarchical = {
       "enabled":False,
@@ -66,8 +82,8 @@ if not _RELEASE:
     edges = [Edge(source=i, target=j, type="CURVE_SMOOTH") for (i,j) in G.edges]
     config = Config(width=750, height=750) # layout={"hierarchical":True} directed=True #
     container = st.container()
-    container.write("This is inside the container")
-    return_value = agraph(nodes, edges, config=config, onSelectNode=lambda _: container.write('test'))
-    # ^ i think the solution might be to replace this object with something that can be called
-    # maybe a class with __eq__ for types?
-    # st.write(return_value)
+    graph = Graph(nodes, edges, config)
+    graph.on('selectNode', 
+            lambda _1,_2,_3,_4: st.write("it works")
+        )
+    
